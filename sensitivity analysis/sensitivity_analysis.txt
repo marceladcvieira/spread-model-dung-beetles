@@ -1,0 +1,204 @@
+// Sensitivity analysis STATA 17 (https://www.stata.com/)
+
+clear
+import delimited "C:\.csv", clear // file location 
+
+// a = Onitis alexis  ; b= Onthophagus binodis  ;  i = Euoniticellus intermedius
+// ab = abundance ; oc = occurrence ; mea = mean value of the pixel for that buffer area (10km buffer around Ridsdill-Smith and Hall (1984)sampling points)
+
+gen yearshort=year-1900
+quietly tabulate location, generate(loc_)
+quietly tabulate species, generate(spec_)
+
+//drop status_spr
+gen status_spr=.
+
+//species numbers i=1, b=3 and a=2
+// yr refers to the spread model like _a_oc77mea to _i_oc80mea
+
+forvalues  sp=1/3 {
+		forvalues yr=77/81 {
+replace status_spr=1 if (`sp'==1 & i_oc`yr'mea>0 & `yr'==yearshort)
+replace status_spr=1 if (`sp'==2 & a_oc`yr'mea>0 & `yr'==yearshort)
+replace status_spr=1 if (`sp'==3 & b_oc`yr'mea>0 & `yr'==yearshort)
+                             }
+              }
+
+
+gen surandspr_yes=0
+gen surandspr_no=0
+gen surandspr_yes_no=0
+gen surandspr_no_yes=0
+
+replace surandspr_yes=1 if status==1 & status_sp==1            
+replace surandspr_no=1 if status==0 & status_sp==0			
+replace surandspr_yes_no=1 if status==1 & status_sp==0			 
+replace surandspr_no_yes=1 if status==0 & status_sp==1			
+
+gen a_pres_spr=spec_2*status_spr
+gen b_pres_spr=spec_3*status_spr
+gen i_pres_spr=spec_1*status_spr
+
+
+// this location_code and species_code will be used in the status for each species individually
+gen location_code=.
+forvalues i=1/8 {
+replace location_code=`i' if loc_`i'==1
+}
+
+gen species_code=.
+forvalues i=1/3 {
+replace species_code=`i' if spec_`i'==1
+}
+
+
+// first one is James report and second is our spread model for each species
+
+	// alexis
+gen a_surandap_yes=.         // match
+gen a_surandap_no=.          // match
+gen a_surandap_yes_no=.      // underpredictions
+gen a_surandap_no_yes=.      // overpredictions
+
+	// binodis
+gen b_surandap_yes=.
+gen b_surandap_no=.
+gen b_surandap_yes_no=.
+gen b_surandap_no_yes=.
+
+
+	// intermedius
+gen i_surandap_yes=.
+gen i_surandap_no=.
+gen i_surandap_yes_no=.
+gen i_surandap_no_yes=.
+
+
+
+// for alexis; species_code==2
+forvalues  loc=1/8 {
+		forvalues yr=77/81 {
+			forvalues sp=1/3 {
+replace a_surandap_yes=1 if species_code==2 & status==1 & `loc'==location_code & a_oc`yr'mean>0.5 & `yr'==yearshort
+replace a_surandap_no=1 if species_code==2 & status==0 & `loc'==location_code & a_oc`yr'mean<=0.5 & `yr'==yearshort
+replace a_surandap_yes_no=1 if species_code==2 & status==1 & `loc'==location_code & a_oc`yr'mean<=0.5 & `yr'==yearshort
+replace a_surandap_no_yes=1 if species_code==2 & status==0 & `loc'==location_code & a_oc`yr'mean>0.5 & `yr'==yearshort
+			}
+		}
+	}
+
+replace a_surandap_yes=0 if species_code==2 & a_surandap_yes==.
+replace a_surandap_no=0 if species_code==2 & a_surandap_no==.
+replace a_surandap_yes_no=0 if species_code==2 & a_surandap_yes_no==.
+replace a_surandap_no_yes=0 if species_code==2 & a_surandap_no_yes==.
+	
+	
+// for binodis	species_code==3
+forvalues  loc=1/8 {
+		forvalues yr=77/81 {
+			forvalues sp=1/3 {
+replace b_surandap_yes=1 if species_code==3 & status==1 & `loc'==location_code & b_oc`yr'mean>0.5 & `yr'==yearshort
+replace b_surandap_no=1 if species_code==3 & status==0 & `loc'==location_code & b_oc`yr'mean<=0.5 & `yr'==yearshort
+replace b_surandap_yes_no=1 if species_code==3 & status==1 & `loc'==location_code & b_oc`yr'mean<=0.5 & `yr'==yearshort
+replace b_surandap_no_yes=1 if species_code==3 & status==0 & `loc'==location_code & b_oc`yr'mean>0.5 & `yr'==yearshort
+			}
+		}
+	}
+
+replace b_surandap_yes=0 if species_code==3 & b_surandap_yes==.
+replace b_surandap_no=0 if species_code==3 & b_surandap_no==.
+replace b_surandap_yes_no=0 if species_code==3 & b_surandap_yes_no==.
+replace b_surandap_no_yes=0 if species_code==3 & b_surandap_no_yes==.
+
+
+// for intermedius species_code==1
+forvalues  loc=1/8 {
+		forvalues yr=77/81 {
+			forvalues sp=1/3 {
+replace i_surandap_yes=1 if species_code==1 & status==1 & `loc'==location_code & i_oc`yr'mean>0.5 & `yr'==yearshort
+replace i_surandap_no=1 if species_code==1 & status==0 & `loc'==location_code & i_oc`yr'mean<=0.5 & `yr'==yearshort
+replace i_surandap_yes_no=1 if species_code==1 & status==1 & `loc'==location_code & i_oc`yr'mean<=0.5 & `yr'==yearshort
+replace i_surandap_no_yes=1 if species_code==1 & status==0 & `loc'==location_code & i_oc`yr'mean>0.5 & `yr'==yearshort
+			}
+		}
+	}
+
+replace i_surandap_yes=0 if species_code==1 & i_surandap_yes==.
+replace i_surandap_no=0 if species_code==1 & i_surandap_no==.
+replace i_surandap_yes_no=0 if species_code==1 & i_surandap_yes_no==.
+replace i_surandap_no_yes=0 if species_code==1 & i_surandap_no_yes==.
+
+
+
+// now we have a general validation with Ben's code 
+egen tot_obs = count(_n)                
+
+
+// maybe because missing values
+replace surandspr_yes=0 if surandspr_yes==.
+replace surandspr_no=0 if surandspr_no==.
+
+egen tot_match = total (surandspr_yes + surandspr_no)   
+
+gen general_count_r2=.
+replace general_count_r2= tot_match / tot_obs                
+// by species_code
+// alexis species_code==2
+egen a_tot_obs = count(_n) if species_code==1
+
+replace a_surandap_yes=0 if a_surandap_yes==.
+replace a_surandap_no=0 if a_surandap_no==.
+
+egen a_tot_match = total (a_surandap_yes + a_surandap_no)   
+
+gen a_count_r2=.
+replace a_count_r2= a_tot_match / a_tot_obs  
+   			// ANSWER: alexis_count_r2= 1
+gen a_correct_clss_rate=a_count_r2*100 
+
+// remeber first is James second is spread model
+//False positive rate   b/(b + d)
+//False negative rate  c/(a + c)
+
+egen a_overpred=total(a_surandap_no_yes)    
+egen a_underpred= total(a_surandap_yes_no)  
+
+gen a_false_pos_rate= (a_overpred/a_tot_obs)*100
+gen a_false_neg_rate= (a_underpred/a_tot_obs)*100
+
+// binodis species_code==3
+egen b_tot_obs = count(_n) if species_code==3
+
+replace b_surandap_yes=0 if b_surandap_yes==.
+replace b_surandap_no=0 if b_surandap_no==.
+
+egen b_tot_match = total (b_surandap_yes + b_surandap_no)   
+
+gen b_count_r2=.
+replace b_count_r2= b_tot_match / b_tot_obs               
+gen b_correct_clss_rate=b_count_r2*100
+
+egen b_overpred=total(b_surandap_no_yes)     
+egen b_underpred= total(b_surandap_yes_no)   
+
+gen b_false_pos_rate= (b_overpred/b_tot_obs)*100         
+gen b_false_neg_rate= (b_underpred/b_tot_obs)*100           
+
+
+// intermedius species_code==1
+
+egen i_tot_obs = count(_n) if species_code==1
+
+replace i_surandap_yes=0 if i_surandap_yes==.
+replace i_surandap_no=0 if i_surandap_no==.
+
+egen i_tot_match = total (i_surandap_yes + i_surandap_no)   
+
+gen i_count_r2=.
+replace i_count_r2= i_tot_match / i_tot_obs         
+gen i_correct_clss_rate=i_count_r2*100
+
+egen i_overpred=total(i_surandap_no_yes)     
+egen i_underpred= total(i_surandap_yes_no)  
+gen i_false_pos_rate= (i_overpred/i_tot_obs)*100          
+gen i_false_neg_rate= (i_underpred/i_tot_obs)*100        
