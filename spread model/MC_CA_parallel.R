@@ -30,14 +30,14 @@
 rm(list=ls())
 
 ## SETUP
-setwd("D:/Marcela/ca-spread-model-dung-beetle/")
+#setwd("D:/Marcela/ca-spread-model-dung-beetle/")
 
 library(parallel)
 library(raster)
 library(rgdal)
 
 # parameter_file <- readline(prompt="Enter parameter filename (e.g. parameters_test.R):\n")
-parameter_file <- 'parameters_taurus.R'
+parameter_file <- 'parameters_intermedius.R'
 
 source(paste0('parameter_files/', parameter_file))
 if ((doPlot || doPause) && parallel.proc) {stop('cannot plot and pause with parallel processing. Set parallel.proc to FALSE if you want to plot and pause.')}
@@ -71,12 +71,12 @@ nCol_table <- nCol_table[nCol_table$ratio == SexRatio, ]
 # read as a shape file (only for 0 and 1 data)
 # habitat_suitability <- read.NSHabitat(ext, suitable_habitat, grain, proj_crs)
 # read as a raster file (for data with the actual carrying capacity)
-habitat_suitability <- raster(carrying_capacity_location)
+habitat_suitability <- raster(CCapacity)
 habitat_suitability <- crop.or.extend.habitat.block(ext, habitat_suitability)
 Carrying.capacity.lst <- sapply(rasterToPoints(habitat_suitability)[,3], FUN=list)
 
 ##Read in probability of survival layer
-probability_of_adult_survival <- raster(probability_of_adult_survival_location)
+probability_of_adult_survival <- raster(ProbAdultSurvival)
 probability_of_adult_survival <- crop.or.extend.habitat.block(ext, probability_of_adult_survival)
 probability_of_adult_survival.lst <- sapply(rasterToPoints(probability_of_adult_survival)[,3], FUN=list)
 
@@ -104,7 +104,7 @@ if (doPlot) {
 ## CREATE SPREAD FUNCTIONS
 # natural spread
 # make kernal of percentage of alates at distances from each point
-alateProbKernel <- generate.alate.kernel(grain, AlateFlight_KernelSize, FUN = "exp", alpha = meanFlightDist)   #use "exp" for exponential kernel and "gauss" for gaussian kernel 								 
+alateProbKernel <- generate.alate.kernel(grain, AlateFlight_KernelSize, FUN = "exp", alpha = FlightDistance)   #use "exp" for exponential kernel and "gauss" for gaussian kernel 								 
 # human assisted spread
 # options(scipen=5)
 # humanAssistedProbs <- generate.human.assist.probs(grain, min(KernelSize_east, KernelSize_north), prop$n.properties, psi, omega)

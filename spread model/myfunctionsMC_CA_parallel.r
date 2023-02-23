@@ -359,7 +359,7 @@ colony.survival <- function(current_ages) {
     ###
     # fixed regardless of age
     if (current_age <= MaxAge) {
-      z[z_ind] <- maxSurvival
+      z[z_ind] <- MaxSurvival
     } else {
       z[z_ind] <- 0
     }
@@ -370,18 +370,18 @@ colony.survival <- function(current_ages) {
     # if (current_age < AgeOfMaturity) {
     #   # if not mature
     #   x <- c(-1, AgeOfMaturity)
-    #   y <- c(0, maxSurvival)
+    #   y <- c(0, MaxSurvival)
     # 
     #   z[z_ind] <- approx(x, y, xout=current_age)$y
     # } else if (current_age >= age_of_max_maturity) {
     #   # if at full maturity
     #   x <- c(age_of_max_maturity, (MaxAge+1))
-    #   y <- c(maxSurvival, 0)
+    #   y <- c(MaxSurvival, 0)
     # 
     #   z[z_ind] <- approx(x, y, xout=current_age)$y
     # } else {
     #   # if mature, but not less than age_of_max_maturity
-    #   z[z_ind] <- maxSurvival
+    #   z[z_ind] <- MaxSurvival
     # }
     z_ind <- z_ind + 1
   }
@@ -395,15 +395,15 @@ colony.survival.precalculated <- colony.survival(0:(MaxAge+1))
 #   
 #   if (scenario == 'optimistic'){
 #     
-#     z <- ifelse(x < AgeOfMaturity, 0, 100000 * alateSurvival)
-#     z <- ifelse(x >= AgeOfMaturity & x < 10, 1000 * alateSurvival, z)
-#     z <- ifelse(x >= 10 & x < 15, 10000 * alateSurvival, z)
+#     z <- ifelse(x < AgeOfMaturity, 0, 100000 * EggToAdultSurvival)
+#     z <- ifelse(x >= AgeOfMaturity & x < 10, 1000 * EggToAdultSurvival, z)
+#     z <- ifelse(x >= 10 & x < 15, 10000 * EggToAdultSurvival, z)
 #     
 #   }else if (scenario == 'pessimistic'){
 #     
-#     z <- ifelse(x < AgeOfMaturity, 0, 100000 * alateSurvival)
-#     z <- ifelse(x >= AgeOfMaturity & x < AgeOfMaturity * 2, 10000 * alateSurvival, z)
-#     z <- ifelse(x >= AgeOfMaturity * 2 & x < AgeOfMaturity * 3, 50000 * alateSurvival, z)
+#     z <- ifelse(x < AgeOfMaturity, 0, 100000 * EggToAdultSurvival)
+#     z <- ifelse(x >= AgeOfMaturity & x < AgeOfMaturity * 2, 10000 * EggToAdultSurvival, z)
+#     z <- ifelse(x >= AgeOfMaturity * 2 & x < AgeOfMaturity * 3, 50000 * EggToAdultSurvival, z)
 #     
 #   }
 #   
@@ -440,10 +440,10 @@ alates.gen <- function(current_ages) {
       z[z_ind] <- 0
     } else {
       # if can produce offspring
-      z[z_ind] <- MaxNAlates
+      z[z_ind] <- MaxNOffspring
     }
     
-    z[z_ind] <- z[z_ind] * alateSurvival
+    z[z_ind] <- z[z_ind] * EggToAdultSurvival
     
     z_ind <- z_ind + 1
   }
