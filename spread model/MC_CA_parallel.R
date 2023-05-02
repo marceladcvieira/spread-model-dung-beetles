@@ -349,6 +349,6 @@ write.csv(do.call(rbind, lapply(out_1, '[[', 'area.dataset')),
 summary.stats(do.call(rbind, lapply(out_1, '[[', 'area.dataset')))
 
 ## create and save averaged/sum rasters
-envelope.raster('occupancy', calculate.percent.categories=TRUE)
-envelope.raster('abundance', calculate.percent.categories=TRUE)
+envelope.raster('occupancy')
+envelope.raster('abundance')
 
