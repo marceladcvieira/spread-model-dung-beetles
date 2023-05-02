@@ -815,9 +815,7 @@ envelope.raster <- function(file.identifier) {
   
   for (yrs in start_time:end_time){
     RasDir <- paste0(getwd(), '/', fOutput)
-    
-    yrs <- 15
-    
+      
     #Store full path and name of all raster files corresponding to the current time intervals of the LOOP 
     etiq <- paste0(RasDir,file.identifier,'_Run',seq(NRuns),'_',yrs,'.img')
 
