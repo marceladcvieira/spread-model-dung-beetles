@@ -1,0 +1,231 @@
+//           SPREAD MODEL VLIDATION            // 
+
+// using Dadour and Cook 1997 
+// Load data using for each species (Ont. binodis, Oni. alexis and Ont. taurus)
+
+// E. binodis
+clear
+import delimited "C:\Users\22293261\OneDrive - The University of Western Australia\Paper 1\Drafts paper 1\Ecological Entomology\TO RE SUBMIT Ecological Entomology\Validation 1990_1994\binodis_10km_buffer_Dadour & Cook 1997_validation_may23.csv", clear 
+
+keep if species=="Onthophagus binodis"
+
+
+// Legend:
+// oc = occupancy ; mea = mean value of the pixel for that buffer area (10km buffer around sampling points)
+
+gen yearshort=year-1900
+quietly tabulate location, generate(loc_)
+quietly tabulate species, generate(spec_)
+
+//drop status_spr
+gen status_spr=.
+
+// assign 1 (DB species present) to occupancy values that are >0.5, and zero to occupancy <0.5
+// yr refers to the spread model like oc77mean to oc81mean
+
+foreach i of varlist *mea {
+	forvalues yr=90/94 {
+replace status_spr=1 if (`i'>0.5 & `yr'==yearshort)
+						}
+			}
+
+//create location_code and species_code
+
+gen location_code=.
+forvalues i=1/8 {
+replace location_code=`i' if loc_`i'==1
+}
+
+// first one is report and second is our spread model for each species
+
+	
+	// 
+gen b_correct_yes=.
+gen b_correct_no=.
+gen b_overprediction =.
+gen b_underprediction =.
+
+ 
+foreach model of varlist b_oc_90mea-b_oc_94mea {
+    
+local step = substr("`model'",1,4)
+forval loc = 1/8 {
+forval yr = 90/94 {
+replace b_correct_yes    = 1 if status==1 & location_code==`loc' & yearshort==`yr' & b_oc_`yr'mea>.5
+replace b_correct_no     = 1 if status==0 & location_code==`loc' & yearshort==`yr' & b_oc_`yr'mea<.5
+replace b_underprediction = 1 if status==1 & location_code==`loc' & yearshort==`yr' & b_oc_`yr'mea<.5
+replace b_overprediction = 1 if status==0 & location_code==`loc' & yearshort==`yr' & b_oc_`yr'mea>.5
+}
+}
+}
+
+// replace empty values with zero ^^^^ in the code above
+
+foreach model of varlist b_correct_yes - b_underprediction {
+	replace `model'= 0 if `model'==.
+}
+
+gen  tot_obs = 37
+
+egen correct_b = total(b_correct_yes + b_correct_no)
+replace correct_b =(correct_b/tot_obs)*100
+
+
+egen b_overpred = total(b_overprediction)
+egen b_underpred = total (b_underprediction)
+
+replace b_overpred = (b_overpred /tot_obs)*100
+replace b_underpred = (b_underpred/tot_obs)*100
+
+
+
+
+
+// Oni. alexis
+clear
+import delimited "C:\Users\22293261\OneDrive - The University of Western Australia\Paper 1\Drafts paper 1\Ecological Entomology\TO RE SUBMIT Ecological Entomology\Validation 1990_1994\alexis_10km_buffer_Dadour & Cook 1997_validation_may23.csv", clear 
+
+keep if species=="Onitis alexis"
+
+
+// Legend:
+// oc = occupancy ; mea = mean value of the pixel for that buffer area (10km buffer around sampling points)
+
+gen yearshort=year-1900
+quietly tabulate location, generate(loc_)
+quietly tabulate species, generate(spec_)
+
+//drop status_spr
+gen status_spr=.
+
+// assign 1 (DB species present) to occupancy values that are >0.5, and zero to occupancy <0.5
+// yr refers to the spread model like oc77mean to oc81mean
+
+foreach i of varlist *mea {
+	forvalues yr=90/94 {
+replace status_spr=1 if (`i'>0.5 & `yr'==yearshort)
+						}
+			}
+
+//create location_code and species_code
+
+gen location_code=.
+forvalues i=1/8 {
+replace location_code=`i' if loc_`i'==1
+}
+
+// first one is report and second is our spread model for each species
+
+	
+	//
+gen a_correct_yes=.
+gen a_correct_no=.
+gen a_overprediction =.
+gen a_underprediction =.
+
+ 
+foreach model of varlist a_oc_90mea-a_oc_94mea {
+    
+local step = substr("`model'",1,4)
+forval loc = 1/8 {
+forval yr = 90/94 {
+replace a_correct_yes    = 1 if status==1 & location_code==`loc' & yearshort==`yr' & a_oc_`yr'mea>.5
+replace a_correct_no     = 1 if status==0 & location_code==`loc' & yearshort==`yr' & a_oc_`yr'mea<.5
+replace a_underprediction = 1 if status==1 & location_code==`loc' & yearshort==`yr' & a_oc_`yr'mea<.5
+replace a_overprediction = 1 if status==0 & location_code==`loc' & yearshort==`yr' & a_oc_`yr'mea>.5
+}
+}
+}
+
+// replace empty values with zero ^^^^ in the code above
+
+foreach model of varlist a_correct_yes - a_underprediction {
+	replace `model'= 0 if `model'==.
+}
+
+gen  tot_obs = 37
+
+egen correct_a = total(a_correct_yes + a_correct_no)
+replace correct_a =(correct_a/tot_obs)*100
+
+
+egen a_overpred = total(a_overprediction)
+egen a_underpred = total (a_underprediction)
+
+replace a_overpred = (a_overpred /tot_obs)*100
+replace a_underpred = (a_underpred/tot_obs)*100
+
+
+// Ont. taurus
+clear
+import delimited "C:\Users\22293261\OneDrive - The University of Western Australia\Paper 1\Drafts paper 1\Ecological Entomology\TO RE SUBMIT Ecological Entomology\Validation 1990_1994\taurus_10km_buffer_Dadour & Cook 1997_validation_may23.csv", clear 
+
+keep if species=="Onthophagus taurus"
+
+
+// Legend:
+// oc = occupancy ; mea = mean value of the pixel for that buffer area (10km buffer around sampling points)
+
+gen yearshort=year-1900
+quietly tabulate location, generate(loc_)
+quietly tabulate species, generate(spec_)
+
+//drop status_spr
+gen status_spr=.
+
+// assign 1 (DB species present) to occupancy values that are >0.5, and zero to occupancy <0.5
+// yr refers to the spread model like oc77mean to oc81mean
+
+foreach i of varlist *mea {
+	forvalues yr=90/94 {
+replace status_spr=1 if (`i'>0.5 & `yr'==yearshort)
+						}
+			}
+
+//create location_code and species_code
+
+gen location_code=.
+forvalues i=1/8 {
+replace location_code=`i' if loc_`i'==1
+}
+
+	
+	//
+gen t_correct_yes=.
+gen t_correct_no=.
+gen t_overprediction =.
+gen t_underprediction =.
+
+ 
+foreach model of varlist t_oc_90mea-t_oc_94mea {
+    
+local step = substr("`model'",1,4)
+forval loc = 1/8 {
+forval yr = 90/94 {
+replace t_correct_yes    = 1 if status==1 & location_code==`loc' & yearshort==`yr' & t_oc_`yr'mea>.5
+replace t_correct_no     = 1 if status==0 & location_code==`loc' & yearshort==`yr' & t_oc_`yr'mea<.5
+replace t_underprediction = 1 if status==1 & location_code==`loc' & yearshort==`yr' & t_oc_`yr'mea<.5
+replace t_overprediction = 1 if status==0 & location_code==`loc' & yearshort==`yr' & t_oc_`yr'mea>.5
+}
+}
+}
+
+// replace empty values with zero ^^^^ in the code above
+
+foreach model of varlist t_correct_yes - t_underprediction {
+	replace `model'= 0 if `model'==.
+}
+
+gen  tot_obs = 37
+
+egen correct_t = total(t_correct_yes + t_correct_no)
+replace correct_t =(correct_t/tot_obs)*100
+
+
+egen t_overpred = total(t_overprediction)
+egen t_underpred = total (t_underprediction)
+
+replace t_overpred = (t_overpred /tot_obs)*100
+replace t_underpred = (t_underpred/tot_obs)*100
+
+
