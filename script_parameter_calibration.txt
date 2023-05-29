@@ -1,0 +1,590 @@
+//           SPREAD MODEL CALIBRATION             // 
+
+// using Ridsdill-Smith and Hall (1984)
+// Load data using for each species (Ont. binodis, E. intermedius and Oni. alexis)- changing flight distance parameter
+
+// E. intermedius
+clear
+import delimited "C:\Users\22293261\OneDrive - The University of Western Australia\Paper 1\Drafts paper 1\Ecological Entomology\TO RE SUBMIT Ecological Entomology\Calibration 1977_1978\Buffer 10km\Calibration_Ridsdill-Smith and Hall 1984_3577_10km_buffer_intermedius.csv", clear 
+
+keep if species=="Euoniticellus intermedius"
+keep species location latitude longitude year status mean_abund *m *mean   //*m means keep colunms ending with the letter m
+
+// keep columns with occupancy only (delete abundance)
+drop *sum *ab77m *ab78m *ab79m *ab80m *ab81m *ab77mean *ab78mean *ab79mean *ab80mean *ab81mean    //drop colunms ending with sum
+
+// Legend:
+// ab = abundance ; oc = occupancy ; mea = mean value of the pixel for that buffer area (10km buffer around James Ridsdill-Smith sampling points)
+
+gen yearshort=year-1900
+quietly tabulate location, generate(loc_)
+quietly tabulate species, generate(spec_)
+
+//drop status_spr
+gen status_spr=.
+
+// assign 1 (DB species present) to occupancy values that are >0.5, and zero to occupancy <0.5
+// yr refers to the spread model like oc77mean to oc81mean
+
+foreach i of varlist *mean *m {
+	forvalues yr=77/81 {
+replace status_spr=1 if (`i'>0.5 & `yr'==yearshort)
+						}
+			}
+
+//create location_code and species_code
+
+gen location_code=.
+forvalues i=1/8 {
+replace location_code=`i' if loc_`i'==1
+}
+
+// first one is James report and second is our spread model for each species
+// intermedius calibration flight distance mo50 = flight * 1.5 (more 50%)  and mi50 = = flight * 0.5 (minus 50%)
+
+	
+	// flight * 1.5 
+gen mo50_correct_yes=.
+gen mo50_correct_no=.
+gen mo50_overprediction =.
+gen mo50_underprediction =.
+
+   // flight * 1.4 
+gen mo40_correct_yes=.
+gen mo40_correct_no=.
+gen mo40_overprediction =.
+gen mo40_underprediction=.
+
+  // flight * 1.3
+gen mo30_correct_yes=.
+gen mo30_correct_no=.
+gen mo30_overprediction=.
+gen mo30_underprediction=.
+
+  // flight * 1.2 
+gen mo20_correct_yes=.
+gen mo20_correct_no=.
+gen mo20_overprediction=.
+gen mo20_underprediction=.
+
+  // flight * 1.1
+gen mo10_correct_yes=.
+gen mo10_correct_no=.
+gen mo10_overprediction=.
+gen mo10_underprediction=.
+
+  // flight default
+gen d_correct_yes=.
+gen d_correct_no=.
+gen d_overprediction=.
+gen d_underprediction=.
+
+
+  // flight * 0.9
+gen mi50_correct_yes=.
+gen mi50_correct_no=.
+gen mi50_overprediction=.
+gen mi50_underprediction=.
+
+  // flight * 0.8
+gen mi40_correct_yes=.
+gen mi40_correct_no=.
+gen mi40_overprediction=.
+gen mi40_underprediction=.
+
+  // flight * 0.7
+gen mi30_correct_yes=.
+gen mi30_correct_no=.
+gen mi30_overprediction=.
+gen mi30_underprediction=.
+
+  // flight * 0.6
+gen mi20_correct_yes=.
+gen mi20_correct_no=.
+gen mi20_overprediction=.
+gen mi20_underprediction=.
+
+  // flight * 0.5
+gen mi10_correct_yes=.
+gen mi10_correct_no=.
+gen mi10_overprediction=.
+gen mi10_underprediction=.
+
+
+foreach model of varlist mi10_oc77m - mo50_oc81m {
+    
+local step = substr("`model'",1,4)
+forval loc = 1/8 {
+forval yr = 77/81 {
+replace `step'_correct_yes    = 1 if status==1 & location_code==`loc' & yearshort==`yr' & `step'_oc`yr'>.5
+replace `step'_correct_no     = 1 if status==0 & location_code==`loc' & yearshort==`yr' & `step'_oc`yr'<.5
+replace `step'_underprediction = 1 if status==1 & location_code==`loc' & yearshort==`yr' & `step'_oc`yr'<.5
+replace `step'_overprediction = 1 if status==0 & location_code==`loc' & yearshort==`yr' & `step'_oc`yr'>.5
+}
+}
+}
+
+// replace empty values with zero ^^^^ in the code above
+
+foreach model of varlist mo50_correct_yes - mi10_underprediction {
+	replace `model'= 0 if `model'==.
+}
+
+gen  tot_obs = 19 
+
+egen correct_mi10 = total(mi10_correct_yes + mi10_correct_no)
+egen correct_mi20 = total(mi20_correct_yes + mi20_correct_no)
+egen correct_mi30  = total(mi30_correct_yes + mi30_correct_no)
+egen correct_mi40  = total(mi40_correct_yes + mi40_correct_no)
+egen correct_mi50  = total(mi50_correct_yes + mi50_correct_no)
+egen correct_mo10  = total(mo10_correct_yes + mo10_correct_no)
+egen correct_mo20 = total(mo20_correct_yes + mo20_correct_no)
+egen correct_mo30 = total(mo30_correct_yes + mo30_correct_no)
+egen correct_mo40 = total(mo40_correct_yes + mo40_correct_no)
+egen correct_mo50 = total(mo50_correct_yes + mo50_correct_no)
+
+foreach correct of varlist correct_mi10-correct_mo50{
+	replace `correct'= (`correct' /tot_obs)*100
+}
+
+
+foreach var of varlist correct_mi10 - correct_mo50 {
+local name = substr("`var'",9,12)
+
+egen `name'_overpred = total(`name'_overprediction)
+egen `name'_underpred = total (`name'_underprediction)
+
+replace `name'_overpred = (`name'_overpred /tot_obs)*100
+replace `name'_underpred = (`name'_underpred/tot_obs)*100
+}
+
+
+// for Default value
+
+foreach default of varlist d_oc77mean - d_oc81mean  {
+    
+local step = substr("`default'",1,4)
+forval loc = 1/8 {
+forval yr = 77/81 {
+replace d_correct_yes    = 1 if status==1 & location_code==`loc' & yearshort==`yr' & d_oc`yr'>.5
+replace d_correct_no     = 1 if status==0 & location_code==`loc' & yearshort==`yr' & d_oc`yr'<.5
+replace d_underprediction = 1 if status==1 & location_code==`loc' & yearshort==`yr' & d_oc`yr'<.5
+replace d_overprediction = 1 if status==0 & location_code==`loc' & yearshort==`yr' & d_oc`yr'>.5
+}
+}
+}
+
+// replace empty values with zero ^^^^ in the code above
+
+foreach default of varlist d_oc77mean - d_oc81mean  {
+	replace `default'= 0 if `default'==.
+}
+
+
+egen correct_d = total(d_correct_yes + d_correct_no)
+replace correct_d= (correct_d /tot_obs)*100
+
+
+
+
+
+
+
+
+// O. binodis
+clear
+import delimited "C:\Users\22293261\OneDrive - The University of Western Australia\Paper 1\Drafts paper 1\Ecological Entomology\TO RE SUBMIT Ecological Entomology\Calibration 1977_1978\Buffer 10km\Calibration_Ridsdill-Smith and Hall 1984_3577_10km_buffer_binodis.csv", clear 
+
+keep if species=="Onthophagus binodis"
+keep species location latitude longitude year status mean_abund *m *mean   //*m means keep colunms ending with the letter m
+
+// order dataset the same as previous
+
+order species location latitude longitude year status mean_abund d_oc77mean d_oc78mean d_oc79mean d_oc80mean d_oc81mean mi10_oc77m mi10_oc78m mi10_oc79m mi10_oc80m mi10_oc81m mi20_oc77m mi20_oc78m mi20_oc79m mi20_oc80m mi20_oc81m mi30_oc77m mi30_oc78m mi30_oc79m mi30_oc80m mi30_oc81m mi40_oc77m mi40_oc78m mi40_oc79m mi40_oc80m mi40_oc81m mi50_oc77m mi50_oc78m mi50_oc79m mi50_oc80m mi50_oc81m mo10_oc77m mo10_oc78m mo10_oc79m mo10_oc80m mo10_oc81m mo20_oc77m mo20_oc78m mo20_oc79m mo20_oc80m mo20_oc81m mo30_oc77m mo30_oc78m mo30_oc79m mo30_oc80m mo30_oc81m mo40_oc77m mo40_oc78m mo40_oc79m mo40_oc80m mo40_oc81m mo50_oc77m mo50_oc78m mo50_oc79m mo50_oc80m mo50_oc81m
+
+
+// keep columns with occupancy only (delete abundance)
+drop *sum    //drop colunms ending with sum
+
+// Legend:
+// ab = abundance ; oc = occupancy ; mea = mean value of the pixel for that buffer area (10km buffer around James Ridsdill-Smith sampling points)
+
+gen yearshort=year-1900
+quietly tabulate location, generate(loc_)
+quietly tabulate species, generate(spec_)
+
+//drop status_spr
+gen status_spr=.
+
+// assign 1 (DB species present) to occupancy values that are >0.5, and zero to occupancy <0.5
+// yr refers to the spread model like oc77mean to oc81mean
+
+foreach i of varlist *mean *m {
+	forvalues yr=77/81 {
+replace status_spr=1 if (`i'>0.5 & `yr'==yearshort)
+						}
+			}
+
+//create location_code and species_code
+
+gen location_code=.
+forvalues i=1/8 {
+replace location_code=`i' if loc_`i'==1
+}
+
+// first one is James report and second is our spread model for each species
+// intermedius calibration flight distance mo50 = flight * 1.5 (more 50%)  and mi50 = = flight * 0.5 (minus 50%)
+
+	
+	// flight * 1.5 
+gen mo50_correct_yes=.
+gen mo50_correct_no=.
+gen mo50_overprediction =.
+gen mo50_underprediction =.
+
+   // flight * 1.4 
+gen mo40_correct_yes=.
+gen mo40_correct_no=.
+gen mo40_overprediction =.
+gen mo40_underprediction=.
+
+  // flight * 1.3
+gen mo30_correct_yes=.
+gen mo30_correct_no=.
+gen mo30_overprediction=.
+gen mo30_underprediction=.
+
+  // flight * 1.2 
+gen mo20_correct_yes=.
+gen mo20_correct_no=.
+gen mo20_overprediction=.
+gen mo20_underprediction=.
+
+  // flight * 1.1
+gen mo10_correct_yes=.
+gen mo10_correct_no=.
+gen mo10_overprediction=.
+gen mo10_underprediction=.
+
+  // flight default
+gen d_correct_yes=.
+gen d_correct_no=.
+gen d_overprediction=.
+gen d_underprediction=.
+
+
+  // flight * 0.9
+gen mi50_correct_yes=.
+gen mi50_correct_no=.
+gen mi50_overprediction=.
+gen mi50_underprediction=.
+
+  // flight * 0.8
+gen mi40_correct_yes=.
+gen mi40_correct_no=.
+gen mi40_overprediction=.
+gen mi40_underprediction=.
+
+  // flight * 0.7
+gen mi30_correct_yes=.
+gen mi30_correct_no=.
+gen mi30_overprediction=.
+gen mi30_underprediction=.
+
+  // flight * 0.6
+gen mi20_correct_yes=.
+gen mi20_correct_no=.
+gen mi20_overprediction=.
+gen mi20_underprediction=.
+
+  // flight * 0.5
+gen mi10_correct_yes=.
+gen mi10_correct_no=.
+gen mi10_overprediction=.
+gen mi10_underprediction=.
+
+
+foreach model of varlist mi10_oc77m - mo50_oc81m {
+    
+local step = substr("`model'",1,4)
+forval loc = 1/8 {
+forval yr = 77/81 {
+replace `step'_correct_yes    = 1 if status==1 & location_code==`loc' & yearshort==`yr' & `step'_oc`yr'>.5
+replace `step'_correct_no     = 1 if status==0 & location_code==`loc' & yearshort==`yr' & `step'_oc`yr'<.5
+replace `step'_underprediction = 1 if status==1 & location_code==`loc' & yearshort==`yr' & `step'_oc`yr'<.5
+replace `step'_overprediction = 1 if status==0 & location_code==`loc' & yearshort==`yr' & `step'_oc`yr'>.5
+}
+}
+}
+
+
+// replace empty values with zero ^^^^ in the code above
+
+foreach model of varlist mo50_correct_yes - mi10_underprediction {
+	replace `model'= 0 if `model'==.
+}
+
+gen  tot_obs = 19 
+
+egen correct_mi10 = total(mi10_correct_yes + mi10_correct_no)
+egen correct_mi20 = total(mi20_correct_yes + mi20_correct_no)
+egen correct_mi30  = total(mi30_correct_yes + mi30_correct_no)
+egen correct_mi40  = total(mi40_correct_yes + mi40_correct_no)
+egen correct_mi50  = total(mi50_correct_yes + mi50_correct_no)
+egen correct_mo10  = total(mo10_correct_yes + mo10_correct_no)
+egen correct_mo20 = total(mo20_correct_yes + mo20_correct_no)
+egen correct_mo30 = total(mo30_correct_yes + mo30_correct_no)
+egen correct_mo40 = total(mo40_correct_yes + mo40_correct_no)
+egen correct_mo50 = total(mo50_correct_yes + mo50_correct_no)
+
+foreach correct of varlist correct_mi10-correct_mo50{
+	replace `correct'= (`correct' /tot_obs)*100
+}
+
+
+foreach var of varlist correct_mi10 - correct_mo50 {
+local name = substr("`var'",9,12)
+
+egen `name'_overpred = total(`name'_overprediction)
+egen `name'_underpred = total (`name'_underprediction)
+
+replace `name'_overpred = (`name'_overpred /tot_obs)*100
+replace `name'_underpred = (`name'_underpred/tot_obs)*100
+}
+
+
+// for Default value
+
+foreach default of varlist d_oc77mean - d_oc81mean  {
+    
+local step = substr("`default'",1,4)
+forval loc = 1/8 {
+forval yr = 77/81 {
+replace d_correct_yes    = 1 if status==1 & location_code==`loc' & yearshort==`yr' & d_oc`yr'>.5
+replace d_correct_no     = 1 if status==0 & location_code==`loc' & yearshort==`yr' & d_oc`yr'<.5
+replace d_underprediction = 1 if status==1 & location_code==`loc' & yearshort==`yr' & d_oc`yr'<.5
+replace d_overprediction = 1 if status==0 & location_code==`loc' & yearshort==`yr' & d_oc`yr'>.5
+}
+}
+}
+
+
+// replace empty values with zero ^^^^ in the code above
+
+foreach default of varlist d_oc77mean - d_oc81mean  {
+	replace `default'= 0 if `default'==.
+}
+
+
+egen correct_d = total(d_correct_yes + d_correct_no)
+replace correct_d= (correct_d /tot_obs)*100
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// O. alexis
+clear
+import delimited "C:\Users\22293261\OneDrive - The University of Western Australia\Paper 1\Drafts paper 1\Ecological Entomology\TO RE SUBMIT Ecological Entomology\Calibration 1977_1978\Buffer 10km\Calibration_Ridsdill-Smith and Hall 1984_3577_10km_buffer_alexis.csv", clear 
+
+keep if species=="Onitis alexis"
+keep species location latitude longitude year status mean_abund *m *mean   //*m means keep colunms ending with the letter m
+
+// order dataset the same as previous
+
+order species location latitude longitude year status mean_abund d_oc77mean d_oc78mean d_oc79mean d_oc80mean d_oc81mean mi10_oc77m mi10_oc78m mi10_oc79m mi10_oc80m mi10_oc81m mi20_oc77m mi20_oc78m mi20_oc79m mi20_oc80m mi20_oc81m mi30_oc77m mi30_oc78m mi30_oc79m mi30_oc80m mi30_oc81m mi40_oc77m mi40_oc78m mi40_oc79m mi40_oc80m mi40_oc81m mi50_oc77m mi50_oc78m mi50_oc79m mi50_oc80m mi50_oc81m mo10_oc77m mo10_oc78m mo10_oc79m mo10_oc80m mo10_oc81m mo20_oc77m mo20_oc78m mo20_oc79m mo20_oc80m mo20_oc81m mo30_oc77m mo30_oc78m mo30_oc79m mo30_oc80m mo30_oc81m mo40_oc77m mo40_oc78m mo40_oc79m mo40_oc80m mo40_oc81m mo50_oc77m mo50_oc78m mo50_oc79m mo50_oc80m mo50_oc81m
+
+
+// keep columns with occupancy only (delete abundance)
+drop *sum    //drop colunms ending with sum
+
+// Legend:
+// ab = abundance ; oc = occupancy ; mea = mean value of the pixel for that buffer area (10km buffer around James Ridsdill-Smith sampling points)
+
+gen yearshort=year-1900
+quietly tabulate location, generate(loc_)
+quietly tabulate species, generate(spec_)
+
+//drop status_spr
+gen status_spr=.
+
+// assign 1 (DB species present) to occupancy values that are >0.5, and zero to occupancy <0.5
+// yr refers to the spread model like oc77mean to oc81mean
+
+foreach i of varlist *mean *m {
+	forvalues yr=77/81 {
+replace status_spr=1 if (`i'>0.5 & `yr'==yearshort)
+						}
+			}
+
+//create location_code and species_code
+
+gen location_code=.
+forvalues i=1/8 {
+replace location_code=`i' if loc_`i'==1
+}
+
+// first one is James report and second is our spread model for each species
+// intermedius calibration flight distance mo50 = flight * 1.5 (more 50%)  and mi50 = = flight * 0.5 (minus 50%)
+
+	
+	// flight * 1.5 
+gen mo50_correct_yes=.
+gen mo50_correct_no=.
+gen mo50_overprediction =.
+gen mo50_underprediction =.
+
+   // flight * 1.4 
+gen mo40_correct_yes=.
+gen mo40_correct_no=.
+gen mo40_overprediction =.
+gen mo40_underprediction=.
+
+  // flight * 1.3
+gen mo30_correct_yes=.
+gen mo30_correct_no=.
+gen mo30_overprediction=.
+gen mo30_underprediction=.
+
+  // flight * 1.2 
+gen mo20_correct_yes=.
+gen mo20_correct_no=.
+gen mo20_overprediction=.
+gen mo20_underprediction=.
+
+  // flight * 1.1
+gen mo10_correct_yes=.
+gen mo10_correct_no=.
+gen mo10_overprediction=.
+gen mo10_underprediction=.
+
+  // flight default
+gen d_correct_yes=.
+gen d_correct_no=.
+gen d_overprediction=.
+gen d_underprediction=.
+
+
+  // flight * 0.9
+gen mi50_correct_yes=.
+gen mi50_correct_no=.
+gen mi50_overprediction=.
+gen mi50_underprediction=.
+
+  // flight * 0.8
+gen mi40_correct_yes=.
+gen mi40_correct_no=.
+gen mi40_overprediction=.
+gen mi40_underprediction=.
+
+  // flight * 0.7
+gen mi30_correct_yes=.
+gen mi30_correct_no=.
+gen mi30_overprediction=.
+gen mi30_underprediction=.
+
+  // flight * 0.6
+gen mi20_correct_yes=.
+gen mi20_correct_no=.
+gen mi20_overprediction=.
+gen mi20_underprediction=.
+
+  // flight * 0.5
+gen mi10_correct_yes=.
+gen mi10_correct_no=.
+gen mi10_overprediction=.
+gen mi10_underprediction=.
+
+
+foreach model of varlist mi10_oc77m - mo50_oc81m {
+    
+local step = substr("`model'",1,4)
+forval loc = 1/8 {
+forval yr = 77/81 {
+replace `step'_correct_yes    = 1 if status==1 & location_code==`loc' & yearshort==`yr' & `step'_oc`yr'>.5
+replace `step'_correct_no     = 1 if status==0 & location_code==`loc' & yearshort==`yr' & `step'_oc`yr'<.5
+replace `step'_underprediction = 1 if status==1 & location_code==`loc' & yearshort==`yr' & `step'_oc`yr'<.5
+replace `step'_overprediction = 1 if status==0 & location_code==`loc' & yearshort==`yr' & `step'_oc`yr'>.5
+}
+}
+}
+
+
+// replace empty values with zero ^^^^ in the code above
+
+foreach model of varlist mo50_correct_yes - mi10_underprediction {
+	replace `model'= 0 if `model'==.
+}
+
+gen  tot_obs = 19 
+
+egen correct_mi10 = total(mi10_correct_yes + mi10_correct_no)
+egen correct_mi20 = total(mi20_correct_yes + mi20_correct_no)
+egen correct_mi30  = total(mi30_correct_yes + mi30_correct_no)
+egen correct_mi40  = total(mi40_correct_yes + mi40_correct_no)
+egen correct_mi50  = total(mi50_correct_yes + mi50_correct_no)
+egen correct_mo10  = total(mo10_correct_yes + mo10_correct_no)
+egen correct_mo20 = total(mo20_correct_yes + mo20_correct_no)
+egen correct_mo30 = total(mo30_correct_yes + mo30_correct_no)
+egen correct_mo40 = total(mo40_correct_yes + mo40_correct_no)
+egen correct_mo50 = total(mo50_correct_yes + mo50_correct_no)
+
+foreach correct of varlist correct_mi10-correct_mo50{
+	replace `correct'= (`correct' /tot_obs)*100
+}
+
+
+foreach var of varlist correct_mi10 - correct_mo50 {
+local name = substr("`var'",9,12)
+
+egen `name'_overpred = total(`name'_overprediction)
+egen `name'_underpred = total (`name'_underprediction)
+
+replace `name'_overpred = (`name'_overpred /tot_obs)*100
+replace `name'_underpred = (`name'_underpred/tot_obs)*100
+}
+
+
+// for Default value
+
+foreach default of varlist d_oc77mean - d_oc81mean  {
+    
+local step = substr("`default'",1,4)
+forval loc = 1/8 {
+forval yr = 77/81 {
+replace d_correct_yes    = 1 if status==1 & location_code==`loc' & yearshort==`yr' & d_oc`yr'>.5
+replace d_correct_no     = 1 if status==0 & location_code==`loc' & yearshort==`yr' & d_oc`yr'<.5
+replace d_underprediction = 1 if status==1 & location_code==`loc' & yearshort==`yr' & d_oc`yr'<.5
+replace d_overprediction = 1 if status==0 & location_code==`loc' & yearshort==`yr' & d_oc`yr'>.5
+}
+}
+}
+
+
+// replace empty values with zero ^^^^ in the code above
+
+foreach default of varlist d_oc77mean - d_oc81mean  {
+	replace `default'= 0 if `default'==.
+}
+
+
+egen correct_d = total(d_correct_yes + d_correct_no)
+replace correct_d= (correct_d /tot_obs)*100
+
+
+
+
+
