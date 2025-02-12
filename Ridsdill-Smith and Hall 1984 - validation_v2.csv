@@ -1,0 +1,58 @@
+species,location,latitude,longitude,year,status,mean_abundance_month
+Onitis alexis,Geraldton,-28.81666667,114.7833333,1978,1,8
+Onitis alexis,Geraldton,-28.81666667,114.7833333,1979,1,18
+Onthophagus binodis,Geraldton,-28.81666667,114.7833333,1978,0,0
+Onthophagus binodis,Geraldton,-28.81666667,114.7833333,1979,0,0
+Euoniticellus intermedius,Geraldton,-28.81666667,114.7833333,1978,0,0
+Euoniticellus intermedius,Geraldton,-28.81666667,114.7833333,1979,0,0
+Euoniticellus intermedius,Dandaragan,-30.71666667,115.4666667,1979,1,51
+Euoniticellus intermedius,Dandaragan,-30.71666667,115.4666667,1980,1,119
+Onitis alexis,Dandaragan,-30.71666667,115.4666667,1979,0,0
+Onitis alexis,Dandaragan,-30.71666667,115.4666667,1980,0,0
+Onthophagus binodis,Dandaragan,-30.71666667,115.4666667,1979,0,0
+Onthophagus binodis,Dandaragan,-30.71666667,115.4666667,1980,0,0
+Onitis alexis,Cunderdin,-31.63333333,117.1666667,1978,0,0
+Onitis alexis,Cunderdin,-31.63333333,117.1666667,1979,0,0
+Onthophagus binodis,Cunderdin,-31.63333333,117.1666667,1978,0,0
+Onthophagus binodis,Cunderdin,-31.63333333,117.1666667,1979,0,0
+Euoniticellus intermedius,Cunderdin,-31.63333333,117.1666667,1978,0,0
+Euoniticellus intermedius,Cunderdin,-31.63333333,117.1666667,1979,0,0
+Onitis alexis,Armadale ,-32.16666667,115.9666667,1977,0,0
+Onitis alexis,Armadale ,-32.16666667,115.9666667,1978,0,0
+Onthophagus binodis,Armadale ,-32.16666667,115.9666667,1977,1,4
+Onthophagus binodis,Armadale ,-32.16666667,115.9666667,1978,1,1
+Euoniticellus intermedius,Armadale ,-32.16666667,115.9666667,1977,0,0
+Euoniticellus intermedius,Armadale ,-32.16666667,115.9666667,1978,0,0
+Onitis alexis,Serpentine,-32.41666667,115.9666667,1979,0,0
+Onitis alexis,Serpentine,-32.41666667,115.9666667,1980,0,0
+Onthophagus binodis,Serpentine,-32.41666667,115.9666667,1979,0,0
+Onthophagus binodis,Serpentine,-32.41666667,115.9666667,1980,0,0
+Euoniticellus intermedius,Serpentine,-32.41666667,115.9666667,1979,0,0
+Euoniticellus intermedius,Serpentine,-32.41666667,115.9666667,1980,0,0
+Onthophagus binodis,Dardanup,-33.38333333,115.75,1977,1,67
+Onthophagus binodis,Dardanup,-33.38333333,115.75,1978,1,184
+Onthophagus binodis,Dardanup,-33.38333333,115.75,1979,1,148
+Onitis alexis,Dardanup,-33.38333333,115.75,1977,0,0
+Onitis alexis,Dardanup,-33.38333333,115.75,1978,0,0
+Onitis alexis,Dardanup,-33.38333333,115.75,1979,0,0
+Euoniticellus intermedius,Dardanup,-33.38333333,115.75,1977,0,0
+Euoniticellus intermedius,Dardanup,-33.38333333,115.75,1978,0,0
+Euoniticellus intermedius,Dardanup,-33.38333333,115.75,1979,0,0
+Onthophagus binodis,Busselton,-33.75,115.2833333,1979,0,0
+Onthophagus binodis,Busselton,-33.75,115.2833333,1980,0,0
+Onthophagus binodis,Busselton,-33.75,115.2833333,1981,0,0
+Onitis alexis,Busselton,-33.75,115.2833333,1979,0,0
+Onitis alexis,Busselton,-33.75,115.2833333,1980,0,0
+Onitis alexis,Busselton,-33.75,115.2833333,1981,0,0
+Euoniticellus intermedius,Busselton,-33.75,115.2833333,1979,0,0
+Euoniticellus intermedius,Busselton,-33.75,115.2833333,1980,0,0
+Euoniticellus intermedius,Busselton,-33.75,115.2833333,1981,0,0
+Onthophagus binodis,Narrikup,-33.78333333,117.7,1977,1,37
+Onthophagus binodis,Narrikup,-33.78333333,117.7,1978,1,141
+Onthophagus binodis,Narrikup,-33.78333333,117.7,1979,1,1
+Onitis alexis,Narrikup,-33.78333333,117.7,1977,0,0
+Onitis alexis,Narrikup,-33.78333333,117.7,1978,0,0
+Onitis alexis,Narrikup,-33.78333333,117.7,1979,0,0
+Euoniticellus intermedius,Narrikup,-33.78333333,117.7,1977,0,0
+Euoniticellus intermedius,Narrikup,-33.78333333,117.7,1978,0,0
+Euoniticellus intermedius,Narrikup,-33.78333333,117.7,1979,0,0
